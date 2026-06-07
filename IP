@@ -88,17 +88,7 @@ local function getelite()
     return nil
 end
 
-local function checkgatcan()
-    local ok, result = pcall(function()
-        return game:GetService("ReplicatedStorage")
-            .Remotes.CommF_:InvokeServer("CheckTempleDoor")
-    end)
 
-    if ok and result then
-        return "Pulled"
-    end
-    return "No"
-end
 
 
 
