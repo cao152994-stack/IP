@@ -1,0 +1,234 @@
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local API_URL = "https://fruit-api.cao152994.workers.dev/set"
+
+-- =========================
+-- SEA DETECT
+-- =========================
+local placeId = game.PlaceId
+local Sea
+
+if placeId == 2753915549 or placeId == 85211729168715 then
+    Sea = "Main"
+elseif placeId == 4442272183 or placeId == 79091703265657 then
+    Sea = "Sea 2"
+elseif placeId == 7449423635 or placeId == 100117331123089 then
+    Sea = "Sea 3"
+end
+
+-- =========================
+-- SEND API
+-- =========================
+local function SendAPI(payload)
+    request({
+        Url = API_URL,
+        Method = "POST",
+        Headers = {["Content-Type"] = "application/json"},
+        Body = HttpService:JSONEncode(payload)
+    })
+end
+
+-- =========================
+-- TIME / MOON
+-- =========================
+local function getClock()
+    return math.floor(Lighting.ClockTime)
+end
+
+local function isnight()
+    local t = math.floor(Lighting.ClockTime)
+    return (t >= 18 or t < 5)
+end
+
+local function isrealmoon()
+    return (math.floor(Lighting.ClockTime) >= 12 or math.floor(Lighting.ClockTime) < 5)
+end
+
+local function getfm()
+    if Lighting:GetAttribute("MoonPhase") == 5 and (getClock() >= 12 or getClock() < 5) then
+        return "Full Moon"
+    elseif Lighting:GetAttribute("MoonPhase") == 4 then
+        return "Next Night"
+    else
+        return "Bad Moon"
+    end
+end
+
+-- =========================
+-- BASIC CHECKS
+-- =========================
+local function getmirage()
+    return Workspace.Map:FindFirstChild("MysticIsland") ~= nil
+end
+
+local function getelite()
+    if ReplicatedStorage:FindFirstChild("Deandre") then
+        return "Deandre"
+    elseif ReplicatedStorage:FindFirstChild("Urban") then
+        return "Urban"
+    elseif ReplicatedStorage:FindFirstChild("Diablo") then
+        return "Diablo"
+    end
+
+    return nil
+end
+
+local function checkgatcan()
+    local ok, result = pcall(function()
+        return game:GetService("ReplicatedStorage")
+            .Remotes.CommF_:InvokeServer("CheckTempleDoor")
+    end)
+
+    if ok and result then
+        return "Pulled"
+    end
+    return "No"
+end
+
+local function berry()
+    local bushes = CollectionService:GetTagged("BerryBush")
+
+    for _, bush in pairs(bushes) do
+        for attr, _ in pairs(bush:GetAttributes()) do
+            if attr == "Red Cherry Berry"
+            or attr == "White Cloud Berry"
+            or attr == "Pink Pig Berry" then
+                return attr
+            end
+        end
+    end
+end
+
+-- =========================
+-- BOSS CHECK
+-- =========================
+local RareBosses = {
+    "rip_indra True Form",
+    "Darkbeard",
+    "Dough King",
+    "Soul Reaper"
+}
+
+local function HaveRareBoss(name)
+    for _, obj in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
+        if string.find(obj.Name, name) then return true end
+    end
+
+    for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
+        if string.find(enemy.Name, name) then return true end
+    end
+
+    return false
+end
+
+-- =========================
+-- LEG NPC
+-- =========================
+local function havelegnpc()
+    local npc = Workspace:FindFirstChild("NPCs")
+    if npc and npc:FindFirstChild("Legendary Sword Dealer ") then
+        return true
+    end
+
+    local rep = game:GetService("ReplicatedStorage"):FindFirstChild("NPCs")
+    if rep and rep:FindFirstChild("Legendary Sword Dealer ") then
+        return true
+    end
+
+    return false
+end
+
+-- =========================
+-- ANTI SPAM MEMORY
+-- =========================
+local sent = {}
+
+local function SendEvent(eventType, extra)
+    if sent[eventType] then return end
+    sent[eventType] = true
+
+    SendAPI({
+    
+Player = Players.LocalPlayer.Name,
+        ClockTime = getClock(),
+        IsNight = isnight(),
+        Moon = getfm(),
+        PlaceID = game.PlaceId,
+        Sea = Sea,
+        Type = eventType,
+        Extra = extra,
+        JobId = tostring(game.JobId),
+    })
+
+    print("📡 SENT:", eventType)
+end
+
+-- =========================
+-- RESET MEMORY WHEN EVENT DISAPPEARS
+-- =========================
+local function ResetIfGone(condition, key)
+    if not condition then
+        sent[key] = false
+    end
+end
+
+-- =========================
+-- MAIN LOOP
+-- =========================
+spawn(function()
+    while wait(3) do
+
+        -- 🌑 MOON EVENT
+        if isrealmoon() and getfm() == "Full Moon" then
+            SendEvent("FULL_MOON")
+        end
+
+        -- 🌫 MIRAGE
+        if getmirage() then
+            SendEvent("MIRAGE")
+        else
+            ResetIfGone(false, "MIRAGE")
+        end
+
+        -- 👑 ELITE
+        local elite = getelite()
+        if elite then
+            SendEvent("ELITE", elite)
+        else
+            ResetIfGone(false, "ELITE")
+        end
+
+        -- 🏝 LEG NPC
+        if havelegnpc() then
+            SendEvent("LEGENDARY_SWORD_NPC")
+        else
+            ResetIfGone(false, "LEGENDARY_SWORD_NPC")
+        end
+
+        -- 🐉 BERRY
+        local b = berry()
+        if b then
+            SendEvent("BERRY", b)
+        else
+            ResetIfGone(false, "BERRY")
+        end
+
+        -- 💀 RARE BOSSES
+        for _, boss in pairs(RareBosses) do
+            if HaveRareBoss(boss) then
+                SendEvent("RARE_BOSS", boss)
+            end
+        end
+
+        -- 🏛 TEMPLE CHECK
+        local gate = checkgatcan()
+        if gate == "Pulled" then
+            SendEvent("TEMPLE", gate)
+        end
+
+    end
+end)
