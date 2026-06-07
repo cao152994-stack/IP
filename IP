@@ -157,13 +157,16 @@ local function SendEvent(eventType, extra)
     SendAPI({
     
 Player = #Players:GetPlayers() .. "/" .. Players.MaxPlayers,
-        ClockTime = getClock(),
-        IsNight = isnight(),
-        Moon = getfm(),
-        PlaceID = game.PlaceId,
-        Sea = Sea,
+       
+       
+        
         Type = eventType,
         Extra = extra,
+ ClockTime = getClock(),
+        IsNight = isnight(),
+ Moon = getfm(),
+PlaceID = game.PlaceId,
+        Sea = Sea,
         JobId = tostring(game.JobId),
     })
 
