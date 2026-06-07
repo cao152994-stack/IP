@@ -52,9 +52,9 @@ local function getfm()
     if Lighting:GetAttribute("MoonPhase") == 5 and (getClock() >= 12 or getClock() < 5) then
         return "Full Moon"
     elseif Lighting:GetAttribute("MoonPhase") == 4 then
-        return "Next Night"
+        return "🌖Next Night"
     else
-        return "Bad Moon"
+        return "🌑Bad Moon"
     end
 end
 
@@ -190,7 +190,7 @@ spawn(function()
 
         -- 🌑 MOON EVENT
         if isrealmoon() and getfm() == "Full Moon" then
-            SendEvent("FULL_MOON")
+            SendEvent("🌕FULL_MOON")
         end
 
         -- 🌫 MIRAGE
