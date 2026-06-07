@@ -65,6 +65,13 @@ local function getmirage()
     return Workspace.Map:FindFirstChild("MysticIsland") ~= nil
 end
 
+local function getLegHaki()
+local Haki = game.ReplicatedStorage.Remotes.CommF_:InvokeServer("ColorsDealer", "1")
+if Haki == "Snow White" or Haki == "Pure Red" or Haki == "Winter Sky" t
+return Haki
+end
+end
+
 local function getelite()
     if ReplicatedStorage:FindFirstChild("Deandre") then
         return "Deandre"
@@ -203,6 +210,10 @@ spawn(function()
         else
             ResetIfGone(false, "ELITE")
         end
+local Haki = getLegHaki()
+if Haki then
+ SendEvent("HAKI_LEGENDARY", Haki)
+end
 
         -- 🏝 LEG NPC
         if havelegnpc() then
