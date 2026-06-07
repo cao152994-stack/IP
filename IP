@@ -220,8 +220,10 @@ if Haki then
 end
 
         -- 🏝 LEG NPC
+
         if havelegnpc() then
-            SendEvent("LEGENDARY_SWORD_NPC")
+ local CurrentSword = game.ReplicatedStorage.Remotes.CommF_:InvokeServer('LegendarySwordDealer', "1")
+            SendEvent("LEGENDARY_SWORD_NPC",CurrentSword)
         else
             ResetIfGone(false, "LEGENDARY_SWORD_NPC")
         end
@@ -241,11 +243,8 @@ end
             end
         end
 
-        -- 🏛 TEMPLE CHECK
-        local gate = checkgatcan()
-        if gate == "Pulled" then
-            SendEvent("TEMPLE", gate)
-        end
+       
+        
 
     end
 end)
