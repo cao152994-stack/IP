@@ -89,15 +89,19 @@ local function checkgatcan()
     return "No"
 end
 
+
+
 local function berry()
     local bushes = CollectionService:GetTagged("BerryBush")
 
     for _, bush in pairs(bushes) do
-        for attr, _ in pairs(bush:GetAttributes()) do
-            if attr == "Red Cherry Berry"
-            or attr == "White Cloud Berry"
-            or attr == "Pink Pig Berry" then
-                return attr
+        local attrs = bush:GetAttributes()
+
+        for _, value in pairs(attrs) do
+            if value == "Red Cherry Berry"
+            or value == "White Cloud Berry"
+            or value == "Pink Pig Berry" then
+                return value
             end
         end
     end
