@@ -66,12 +66,16 @@ local function getmirage()
 end
 
 local function getLegHaki()
-local Haki = game.ReplicatedStorage.Remotes.CommF_:InvokeServer("ColorsDealer", "1")
-if Haki == "Snow White" or Haki == "Pure Red" or Haki == "Winter Sky" t
-return Haki
-end
-end
+    local Haki = game.ReplicatedStorage.Remotes.CommF_:InvokeServer("ColorsDealer", "1")
 
+    if Haki == "Snow White"
+    or Haki == "Pure Red"
+    or Haki == "Winter Sky" then
+        return Haki
+    end
+
+    return nil
+end
 local function getelite()
     if ReplicatedStorage:FindFirstChild("Deandre") then
         return "Deandre"
