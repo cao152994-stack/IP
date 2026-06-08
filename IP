@@ -195,7 +195,7 @@ spawn(function()
 
         -- 🌫 MIRAGE
         if getmirage() then
-            SendEvent("MIRAGE")
+            SendEvent("🏝MIRAGE")
         else
             ResetIfGone(false, "MIRAGE")
         end
@@ -203,20 +203,20 @@ spawn(function()
         -- 👑 ELITE
         local elite = getelite()
         if elite then
-            SendEvent("ELITE", elite)
+            SendEvent("😈ELITE", elite)
         else
             ResetIfGone(false, "ELITE")
         end
 local Haki = getLegHaki()
 if Haki then
- SendEvent("HAKI_LEGENDARY", Haki)
+ SendEvent("🌈HAKI_LEGENDARY", Haki)
 end
 
         -- 🏝 LEG NPC
 
         if havelegnpc() then
  local CurrentSword = game.ReplicatedStorage.Remotes.CommF_:InvokeServer('LegendarySwordDealer', "1")
-            SendEvent("LEGENDARY_SWORD_NPC",CurrentSword)
+            SendEvent("⚔LEGENDARY_SWORD_NPC",CurrentSword)
         else
             ResetIfGone(false, "LEGENDARY_SWORD_NPC")
         end
@@ -224,7 +224,7 @@ end
         -- 🐉 BERRY
         local b = berry()
         if b then
-            SendEvent("BERRY", b)
+            SendEvent("🍒BERRY", b)
         else
             ResetIfGone(false, "BERRY")
         end
@@ -232,7 +232,7 @@ end
         -- 💀 RARE BOSSES
         for _, boss in pairs(RareBosses) do
             if HaveRareBoss(boss) then
-                SendEvent("RARE_BOSS", boss)
+                SendEvent("👺RARE_BOSS", boss)
             end
         end
 
