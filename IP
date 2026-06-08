@@ -116,7 +116,23 @@ local RareBosses = {
     "Soul Reaper"
 }
 
+local NormalBosses = {
+    "Cursed Captain",
+}
+
 local function HaveRareBoss(name)
+    for _, obj in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
+        if string.find(obj.Name, name) then return true end
+    end
+
+    for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
+        if string.find(enemy.Name, name) then return true end
+    end
+
+    return false
+end
+
+local function HaveNormalBoss(name)
     for _, obj in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
         if string.find(obj.Name, name) then return true end
     end
@@ -236,7 +252,12 @@ end
             end
         end
 
-       
+          -- 💀 Normal BOSSES
+        for _, boss in pairs(NormalBosses) do
+            if HaveNormalBoss(boss) then
+                SendEvent("👾Normal_BOSS", boss)
+            end
+        end
         
 
     end
