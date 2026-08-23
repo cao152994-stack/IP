@@ -99,9 +99,9 @@ local function berry()
         local attrs = bush:GetAttributes()
 
         for _, value in pairs(attrs) do
-         if value == "White Cloud Berry" or value == "Red Cherry Berry" or value == "Pink Pig Berry" then
+         --if value == "White Cloud Berry" or value == "Red Cherry Berry" or value == "Pink Pig Berry" then
  return value
-end
+--end
         end
     end
 end
