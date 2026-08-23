@@ -4,6 +4,7 @@ local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local API_URL = "https://fruit-api.cao152994.workers.dev/set"
 
 -- =========================
@@ -27,7 +28,9 @@ local function SendAPI(payload)
     request({
         Url = API_URL,
         Method = "POST",
-        Headers = {["Content-Type"] = "application/json"},
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
         Body = HttpService:JSONEncode(payload)
     })
 end
@@ -76,6 +79,7 @@ local function getLegHaki()
 
     return nil
 end
+
 local function getelite()
     if ReplicatedStorage:FindFirstChild("Deandre") then
         return "Deandre"
@@ -88,10 +92,9 @@ local function getelite()
     return nil
 end
 
-
-
-
-
+-- =========================
+-- BERRY
+-- =========================
 local function berry()
     local bushes = CollectionService:GetTagged("BerryBush")
 
@@ -99,9 +102,9 @@ local function berry()
         local attrs = bush:GetAttributes()
 
         for _, value in pairs(attrs) do
-         --if value == "White Cloud Berry" or value == "Red Cherry Berry" or value == "Pink Pig Berry" then
- return value
---end
+          
+                return value
+            
         end
     end
 end
@@ -121,24 +124,32 @@ local NormalBosses = {
 }
 
 local function HaveRareBoss(name)
-    for _, obj in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
-        if string.find(obj.Name, name) then return true end
+    for _, obj in pairs(ReplicatedStorage:GetChildren()) do
+        if string.find(obj.Name, name) then
+            return true
+        end
     end
 
     for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
-        if string.find(enemy.Name, name) then return true end
+        if string.find(enemy.Name, name) then
+            return true
+        end
     end
 
     return false
 end
 
 local function HaveNormalBoss(name)
-    for _, obj in pairs(game:GetService("ReplicatedStorage"):GetChildren()) do
-        if string.find(obj.Name, name) then return true end
+    for _, obj in pairs(ReplicatedStorage:GetChildren()) do
+        if string.find(obj.Name, name) then
+            return true
+        end
     end
 
     for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
-        if string.find(enemy.Name, name) then return true end
+        if string.find(enemy.Name, name) then
+            return true
+        end
     end
 
     return false
@@ -149,11 +160,13 @@ end
 -- =========================
 local function havelegnpc()
     local npc = Workspace:FindFirstChild("NPCs")
+
     if npc and npc:FindFirstChild("Legendary Sword Dealer ") then
         return true
     end
 
-    local rep = game:GetService("ReplicatedStorage"):FindFirstChild("NPCs")
+    local rep = ReplicatedStorage:FindFirstChild("NPCs")
+
     if rep and rep:FindFirstChild("Legendary Sword Dealer ") then
         return true
     end
@@ -162,39 +175,38 @@ local function havelegnpc()
 end
 
 -- =========================
--- ANTI SPAM MEMORY
+-- ANTI SPAM
 -- =========================
 local sent = {}
 
-local function SendEvent(eventType, extra)
-    if sent[eventType] then return end
-    sent[eventType] = true
+local function SendEvent(EventName, Condition)
 
-    SendAPI({
-    
-Player = #Players:GetPlayers() .. "/" .. Players.MaxPlayers,
-       
-       
-        
-        Type = eventType,
-        Extra = extra,
- ClockTime = getClock(),
-        IsNight = isnight(),
- Moon = getfm(),
-PlaceID = game.PlaceId,
-        Sea = Sea,
-        JobId = tostring(game.JobId),
-    })
+    if Condition then
 
-    print("📡 SENT:", eventType)
-end
+        if sent[EventName] then
+            return
+        end
 
--- =========================
--- RESET MEMORY WHEN EVENT DISAPPEARS
--- =========================
-local function ResetIfGone(condition, key)
-    if not condition then
-        sent[key] = false
+        sent[EventName] = true
+print(EventName)
+        local success, err = pcall(function()
+            SendAPI({
+                Event = EventName,
+                JobId = tostring(game.JobId),
+                Time = getClock(),
+                Player = #Players:GetPlayers() .. "/" .. Players.MaxPlayers
+            })
+        end)
+
+        if success then
+            print("📡 SENT:", EventName)
+        else
+            sent[EventName] = nil
+            warn("SendEvent error:", err)
+        end
+
+    else
+        sent[EventName] = nil
     end
 end
 
@@ -202,63 +214,71 @@ end
 -- MAIN LOOP
 -- =========================
 spawn(function()
-    while wait(3) do
+    while task.wait(3) do
 
-        -- 🌑 MOON EVENT
-        if isrealmoon() and getfm() == "Full Moon" then
-            SendEvent("🌕FULL_MOON")
-        end
+        -- FULL MOON
+        SendEvent(
+            "Full Moon",
+            isrealmoon() and getfm() == "Full Moon"
+        )
 
-        -- 🌫 MIRAGE
-        if getmirage() then
-            SendEvent("🏝MIRAGE")
-        else
-            ResetIfGone(false, "MIRAGE")
-        end
+        -- MIRAGE
+        SendEvent(
+            "Mirage",
+            getmirage()
+        )
 
-        -- 👑 ELITE
+        -- ELITE
         local elite = getelite()
+
         if elite then
-            SendEvent("😈ELITE", elite)
+            SendEvent("Elite: " .. elite, true)
         else
-            ResetIfGone(false, "ELITE")
-        end
-local Haki = getLegHaki()
-if Haki then
- SendEvent("🌈HAKI_LEGENDARY", Haki)
-end
-
-        -- 🏝 LEG NPC
-
-        if havelegnpc() then
- local CurrentSword = game.ReplicatedStorage.Remotes.CommF_:InvokeServer('LegendarySwordDealer', "1")
-            SendEvent("⚔LEGENDARY_SWORD_NPC",CurrentSword)
-        else
-            ResetIfGone(false, "LEGENDARY_SWORD_NPC")
+            SendEvent("Elite", false)
         end
 
-        -- 🐉 BERRY
+        -- HAKI
+        local Haki = getLegHaki()
+
+        if Haki then
+            SendEvent("Haki: " .. Haki, true)
+        else
+            SendEvent("Haki", false)
+        end
+
+        -- LEGENDARY SWORD NPC
+        local hasNPC = havelegnpc()
+
+        if hasNPC then
+            SendEvent("Legendary Sword NPC", true)
+        else
+            SendEvent("Legendary Sword NPC", false)
+        end
+
+        -- BERRY
         local b = berry()
+
         if b then
-            SendEvent("🍒BERRY", b)
+            SendEvent("Berry: " .. b, true)
         else
-            ResetIfGone(false, "BERRY")
+            SendEvent("Berry", false)
         end
 
-        -- 💀 RARE BOSSES
+        -- RARE BOSS
         for _, boss in pairs(RareBosses) do
-            if HaveRareBoss(boss) then
-                SendEvent("👺RARE_BOSS", boss)
-            end
+            SendEvent(
+                boss,
+                HaveRareBoss(boss)
+            )
         end
 
-          -- 💀 Normal BOSSES
+        -- NORMAL BOSS
         for _, boss in pairs(NormalBosses) do
-            if HaveNormalBoss(boss) then
-                SendEvent("👾Normal_BOSS", boss)
-            end
+            SendEvent(
+                boss,
+                HaveNormalBoss(boss)
+            )
         end
-        
 
     end
 end)
